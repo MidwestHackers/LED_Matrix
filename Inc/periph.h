@@ -12,6 +12,7 @@ extern "C" {
 extern SPI_HandleTypeDef hspi2;
 extern SPI_HandleTypeDef hspi3;
 extern DMA_HandleTypeDef hdma_spi2_tx;
+extern DMA_HandleTypeDef hdma_spi3_tx;
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart2;
 

@@ -39,6 +39,7 @@
 /* External variables --------------------------------------------------------*/
 extern TIM_HandleTypeDef htim2;
 extern DMA_HandleTypeDef hdma_spi2_tx;
+extern DMA_HandleTypeDef hdma_spi3_tx;
 
 /******************************************************************************/
 /*            Cortex-M3 Processor Interruption and Exception Handlers         */ 
@@ -73,5 +74,13 @@ void TIM2_IRQHandler(void)
 void DMA1_Channel5_IRQHandler(void)
 {
     HAL_DMA_IRQHandler(&hdma_spi2_tx);
+}
+
+/**
+* @brief This function handles DMA2 channel2 global interrupt.
+*/
+void DMA2_Channel2_IRQHandler(void)
+{
+    HAL_DMA_IRQHandler(&hdma_spi3_tx);
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
