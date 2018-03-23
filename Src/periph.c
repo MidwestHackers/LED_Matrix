@@ -6,12 +6,27 @@
 /* Public variables ----------------------------------------------------------*/
 SPI_HandleTypeDef hspi2;
 SPI_HandleTypeDef hspi3;
+DMA_HandleTypeDef hdma_spi2_tx;
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 
 /* Private function prototypes -----------------------------------------------*/
 
 /* Public function prototypes ------------------------------------------------*/
+/** 
+  * Enable DMA controller clock
+  */
+void MX_DMA_Init(void) 
+{
+    /* DMA controller clock enable */
+    __HAL_RCC_DMA1_CLK_ENABLE();
+
+    /* DMA interrupt init */
+    /* DMA1_Channel5_IRQn interrupt configuration */
+    HAL_NVIC_SetPriority(DMA1_Channel5_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(DMA1_Channel5_IRQn);
+}
+
 /*----------------------------------------------------------------------------*/
 /* Configure GPIO                                                             */
 /*----------------------------------------------------------------------------*/
@@ -135,6 +150,23 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
         GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
         GPIO_InitStruct.Alternate = GPIO_AF5_SPI2;
         HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+        /* SPI2 DMA Init */
+        /* SPI2_TX Init */
+        hdma_spi2_tx.Instance = DMA1_Channel5;
+        hdma_spi2_tx.Init.Direction = DMA_MEMORY_TO_PERIPH;
+        hdma_spi2_tx.Init.PeriphInc = DMA_PINC_DISABLE;
+        hdma_spi2_tx.Init.MemInc = DMA_MINC_ENABLE;
+        hdma_spi2_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+        hdma_spi2_tx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+        hdma_spi2_tx.Init.Mode = DMA_NORMAL;
+        hdma_spi2_tx.Init.Priority = DMA_PRIORITY_LOW;
+        if (HAL_DMA_Init(&hdma_spi2_tx) != HAL_OK)
+        {
+            _Error_Handler(__FILE__, __LINE__);
+        }
+
+        __HAL_LINKDMA(&hspi2, hdmatx, hdma_spi2_tx);
     }
     else if(spiHandle->Instance==SPI3)
     {
@@ -175,6 +207,9 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef* spiHandle)
         PB15     ------> SPI2_MOSI 
         */
         HAL_GPIO_DeInit(GPIOB, GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_15);
+
+        /* SPI2 DMA DeInit */
+        HAL_DMA_DeInit(hspi2.hdmatx);
     }
     else if(spiHandle->Instance==SPI3)
     {

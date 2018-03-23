@@ -81,6 +81,7 @@ int main(void)
 
     /* Initialize all configured peripherals */
     MX_GPIO_Init();
+    MX_DMA_Init();
     MX_USART2_UART_Init();
     MX_USART1_UART_Init();
     MX_SPI2_Init();
@@ -145,7 +146,7 @@ void StartSpi2Task(void const * argument)
     for(;;)
     {
         osDelay(25);
-        HAL_SPI_Transmit(&hspi2, data, sizeof(data), 1000);
+        HAL_SPI_Transmit_DMA(&hspi2, data, sizeof(data));
     }
 }
 
