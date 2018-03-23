@@ -59,9 +59,7 @@ Src/stm32l1xx_hal_timebase_TIM.c \
 Src/system_stm32l1xx.c \
 Src/stm32l1xx_hal_msp.c \
 Src/stm32l1xx_it.c \
-Src/spi.c \
-Src/usart.c \
-Src/gpio.c \
+Src/periph.c \
 Src/main.c
 
 # ASM sources

@@ -46,12 +46,9 @@
   ******************************************************************************
   */
 
-#include "main.h"
+#include "periph.h"
 #include "stm32l1xx_hal.h"
 #include "cmsis_os.h"
-#include "spi.h"
-#include "usart.h"
-#include "gpio.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "cmsis_os.h"
@@ -148,7 +145,7 @@ void StartSpi2Task(void const * argument)
     for(;;)
     {
         osDelay(25);
-        HAL_SPI_Transmit(&hspi2, data, sizeof(data));
+        HAL_SPI_Transmit(&hspi2, data, sizeof(data), 1000);
     }
 }
 
