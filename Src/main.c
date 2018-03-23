@@ -59,12 +59,14 @@
 /* Private variables ---------------------------------------------------------*/
 osThreadId ledTaskHandle;
 osThreadId uart2TaskHandle;
+osThreadId spi2TaskHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void MX_FREERTOS_Init(void);
 void StartLedTask(void const * argument);
 void StartUart2Task(void const * argument);
+void StartSpi2Task(void const * argument);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /**
@@ -111,8 +113,10 @@ void MX_FREERTOS_Init(void) {
     /* add threads, ... */
     osThreadDef(ledTask, StartLedTask, osPriorityNormal, 0, 128);
     osThreadDef(uart2Task, StartUart2Task, osPriorityNormal, 0, 128);
+    osThreadDef(spi2Task, StartSpi2Task, osPriorityNormal, 0, 128);
     ledTaskHandle = osThreadCreate(osThread(ledTask), NULL);
     uart2TaskHandle = osThreadCreate(osThread(uart2Task), NULL);
+    spi2TaskHandle = osThreadCreate(osThread(spi2Task), NULL);
 
     /* add queues, ... */
 }
@@ -135,6 +139,16 @@ void StartUart2Task(void const * argument)
     {
         osDelay(5000);
         HAL_UART_Transmit(&huart2, (uint8_t*)&str, sizeof(str), 1000);
+    }
+}
+
+void StartSpi2Task(void const * argument)
+{
+    uint8_t data[] = { 0xDE, 0xAD, 0xBE, 0xEF };
+    for(;;)
+    {
+        osDelay(25);
+        HAL_SPI_Transmit(&hspi2, data, sizeof(data));
     }
 }
 
