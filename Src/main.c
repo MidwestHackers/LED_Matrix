@@ -95,7 +95,7 @@ void SystemClock_Config(void);
 void MX_FREERTOS_Init(void);
 void StartLedTask(void const * argument);
 void StartUart2Task(void const * argument);
-void StartSpi2Task(void const * argument);
+void StartSpiTask(void const * argument);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /**
@@ -143,7 +143,7 @@ void MX_FREERTOS_Init(void) {
     /* add threads, ... */
     osThreadDef(ledTask, StartLedTask, osPriorityNormal, 0, 128);
     osThreadDef(uart2Task, StartUart2Task, osPriorityNormal, 0, 128);
-    osThreadDef(spi2Task, StartSpi2Task, osPriorityNormal, 0, 128);
+    osThreadDef(spi2Task, StartSpiTask, osPriorityNormal, 0, 128);
     ledTaskHandle = osThreadCreate(osThread(ledTask), NULL);
     uart2TaskHandle = osThreadCreate(osThread(uart2Task), NULL);
     spi2TaskHandle = osThreadCreate(osThread(spi2Task), NULL);
@@ -172,12 +172,14 @@ void StartUart2Task(void const * argument)
     }
 }
 
-void StartSpi2Task(void const * argument)
+void StartSpiTask(void const * argument)
 {
     for(;;)
     {
         osDelay(25);
+        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
         HAL_SPI_Transmit_DMA(&hspi2, spi2_data, sizeof(spi2_data));
+        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_11, GPIO_PIN_RESET);
         HAL_SPI_Transmit_DMA(&hspi3, spi3_data, sizeof(spi3_data));
     }
 }
