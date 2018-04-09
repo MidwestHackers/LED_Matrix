@@ -60,7 +60,8 @@ Src/system_stm32l1xx.c \
 Src/stm32l1xx_hal_msp.c \
 Src/stm32l1xx_it.c \
 Src/periph.c \
-Src/main.c
+Src/main.c \
+Src/max_7219.c
 
 # ASM sources
 ASM_SOURCES =  \

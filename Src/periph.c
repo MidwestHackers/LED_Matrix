@@ -203,18 +203,6 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* spiHandle)
     }
 }
 
-void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
-{
-    if (hspi->Instance == SPI2)
-    {
-        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
-    }
-    else if (hspi->Instance == SPI3)
-    {
-        HAL_GPIO_WritePin(GPIOC, GPIO_PIN_11, GPIO_PIN_SET);
-    }
-}
-
 void MX_USART1_UART_Init(void)
 {
     huart1.Instance = USART1;
