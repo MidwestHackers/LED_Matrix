@@ -53,10 +53,12 @@
 #include "task.h"
 #include "cmsis_os.h"
 #include "max_7219.h"
+#include "string.h"
 
 /* Private variables ---------------------------------------------------------*/
 osThreadId ledTaskHandle;
 osThreadId uart2TaskHandle;
+osThreadId uart1TaskHandle;
 osThreadId spiTaskHandle;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -64,8 +66,23 @@ void SystemClock_Config(void);
 void MX_FREERTOS_Init(void);
 void StartLedTask(void const * argument);
 void StartUart2Task(void const * argument);
+void StartUart1Task(void const * argument);
 void StartSpiTask(void const * argument);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
+
+/*
+void debug(const char *format, ...) {
+    char buf[128];
+    int size;
+
+    va_list args;
+    va_start(args, format);
+    size = vsprintf(buf, format, args);
+    va_end(args);
+
+    HAL_UART_Transmit(&huart2, (uint8_t*)buf, size, 1000);
+}
+*/
 
 /**
   * @brief  The application entry point.
@@ -111,11 +128,13 @@ void MX_FREERTOS_Init(void) {
 
     /* add threads, ... */
     osThreadDef(ledTask, StartLedTask, osPriorityNormal, 0, 128);
-    osThreadDef(uart2Task, StartUart2Task, osPriorityNormal, 0, 128);
-    osThreadDef(spiTask, StartSpiTask, osPriorityNormal, 0, 128);
+    //osThreadDef(uart2Task, StartUart2Task, osPriorityNormal, 0, 128);
+    //osThreadDef(uart1Task, StartUart1Task, osPriorityNormal, 0, 128);
+    //osThreadDef(spiTask, StartSpiTask, osPriorityNormal, 0, 128);
     ledTaskHandle = osThreadCreate(osThread(ledTask), NULL);
-    uart2TaskHandle = osThreadCreate(osThread(uart2Task), NULL);
-    spiTaskHandle = osThreadCreate(osThread(spiTask), NULL);
+    //uart2TaskHandle = osThreadCreate(osThread(uart2Task), NULL);
+    //uart1TaskHandle = osThreadCreate(osThread(uart1Task), NULL);
+    //spiTaskHandle = osThreadCreate(osThread(spiTask), NULL);
 
     /* add queues, ... */
 }
@@ -136,9 +155,68 @@ void StartUart2Task(void const * argument)
     char str[] = "Hello World!";
     for(;;)
     {
-        osDelay(5000);
+        osDelay(250);
         HAL_UART_Transmit(&huart2, (uint8_t*)&str, sizeof(str), 1000);
     }
+}
+
+uint8_t sendCommand(const char *cmd)
+{
+    char txBuf[128];
+    char rxBuf[128];
+    int size;
+
+    memset(txBuf, 0, sizeof(txBuf));
+    size = sprintf(txBuf, "%s\r\n", cmd);
+    HAL_UART_Transmit(&huart1, (uint8_t*)txBuf, size, 1000);
+
+    HAL_UART_Receive(&huart1, (uint8_t*)rxBuf, sizeof(rxBuf), 1000);
+    if (strstr(rxBuf, "OK"))
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+void StartUart1Task(void const * argument)
+{
+    for(;;)
+    {
+        sendCommand("AT");
+        osDelay(1000);
+    }
+
+    /*
+    // Simple passthrough so we can easily validate the WiFI module
+    // huart2 -> debug port
+    // huart1 -> WiFi module
+    // AT parser to come...
+    uint8_t pc;
+    uint8_t wifi;
+    HAL_StatusTypeDef pc_status;
+    HAL_StatusTypeDef wifi_status;
+    
+    for(;;)
+    {
+        // see if either side has something to say
+        pc_status = HAL_UART_Receive(&huart2, &pc, 1, 1);
+        wifi_status = HAL_UART_Receive(&huart1, &wifi, 1, 1);
+
+        // if so, send it to the other side
+        if (pc_status == HAL_OK)
+        {
+            HAL_UART_Transmit(&huart1, &pc, 1, HAL_MAX_DELAY);
+        }
+        if (wifi_status == HAL_OK)
+        {
+            HAL_UART_Transmit(&huart2, &wifi, 1, HAL_MAX_DELAY);
+        }
+
+        // don't hog the CPU
+        osDelay(10);
+    }
+    */
 }
 
 volatile uint8_t hspi2_done_flag = 0;
